@@ -3,5 +3,6 @@ export default class Node {
     this.data = data;
     this.children = {}
     this.isWord = false;
+    this.address;
   }
 }
