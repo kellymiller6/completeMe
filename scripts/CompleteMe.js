@@ -1,6 +1,8 @@
 import Node from '../scripts/Node.js'
+import fs from 'fs';
 require('locus')
 
+const text = "/usr/share/dict/words"
 export default class CompleteMe {
   constructor() {
     this.root = new Node();
@@ -10,20 +12,15 @@ export default class CompleteMe {
   insert(word){
     let current = this.root;
     let splitWord = word.split('')
-    let address = ''
 
     splitWord.forEach((letter) => {
       if (!current.children[letter]) {
         current.children[letter] = new Node(letter);
       }
       current = current.children[letter];
-
-      address = address + letter
-      current.address = address
-      // console.log(current)
     })
-    current.isWord = true;
     this.counter++;
+    current.isWord = true;
    }
 
   findNode(string) {
@@ -35,37 +32,50 @@ export default class CompleteMe {
         return current = current.children[letter]
       }
     })
-
-    if (current.address === string){
       return current
     }
-  }
 
-  suggest(prefix, possibleWordArray) {
-
-    var possibleWordArray = possibleWordArray || []
+  suggest(prefix, possibleObjectArray) {
     let foundNode = this.findNode(prefix)
-    let nextLetter = Object.getOwnPropertyNames(foundNode.children).toString()
-
+    var possibleObjectArray = possibleObjectArray || []
     if (foundNode.isWord){
-      possibleWordArray.push(prefix)
+      possibleObjectArray.push({word:prefix, pref:foundNode.pref})
     }
 
-    if(nextLetter) {
-      let letters = nextLetter.split(',')
+    Object.keys(foundNode.children).forEach((key) => {
+      this.suggest(prefix + key, possibleObjectArray)
+    })
 
-      var nextPrefix = letters.map(letter => {
-        return prefix + letter;
-      })
-      for(var i = 0; i<nextPrefix.length; i++){
-        this.suggest(nextPrefix[i], possibleWordArray)
-      }
-    }
+    possibleObjectArray.sort((a, b) => {
+      return b.pref - a.pref;
+    });
 
-    return possibleWordArray;
+    let possibleWordArray = possibleObjectArray.map(function(obj){
+      return obj['word']
+    })
+
+    return possibleWordArray
+  }
+
+  populate() {
+    const dictionary = fs.readFileSync(text).toString('utf-8').trim().split('\n');
+
+    dictionary.forEach((word) => {
+      this.insert(word);
+    });
   }
 
 
+  select(prefix, select) {
+    let possibleWordArray = this.suggest(prefix)
 
+    let selectedWord = possibleWordArray.find((val) => {
+      return val === select
+    })
 
+    var selectedNode = this.findNode(selectedWord)
+    selectedNode.pref++
+    console.log(selectedNode)
+
+  }
 }

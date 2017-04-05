@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import CompleteMe from '../scripts/CompleteMe'
 import Node from '../scripts/Node.js'
+// const text = "/usr/share/dict/words"
 require('locus')
 
 describe('CompleteMe', () => {
@@ -100,4 +101,58 @@ describe('suggest method',()=>{
     expect(completion.suggest('ap')).to.deep.eq(['apple', 'ape', 'apes' ])
     expect(completion.suggest('ba')).to.deep.eq(['banana', 'back' ])
   })
+
 });
+
+describe('populate method', ()=> {
+  it('should return count of dictionary', () => {
+    let completion = new CompleteMe();
+    completion.populate()
+    expect(completion.counter).to.be.eq(235886)
+
+  })
+
+  it('should return array of possible words from a partial string', () => {
+    let completion = new CompleteMe();
+
+    completion.populate()
+
+    expect(completion.suggest('piz')).to.deep.eq(["pize", "pizza", "pizzeria", "pizzicato", "pizzle"])
+  })
+})
+
+  describe('select method', ()=> {
+
+    it('should return array of possible words from a partial string', () => {
+      let completion = new CompleteMe();
+
+      completion.insert('apple');
+      completion.insert('all');
+      completion.insert('banana');
+      completion.insert('back');
+      completion.insert('bean');
+      completion.insert('ape')
+      completion.insert('apes')
+      completion.select('ap', 'apple');
+      completion.select('ap', 'apple');
+      completion.select('ap', 'apple');
+      completion.select('ap', 'apes');
+
+      expect(completion.suggest('ap')).to.deep.eq(['apple', 'apes', 'ape' ])
+      expect(completion.suggest('ba')).to.deep.eq(['banana', 'back' ])
+    })
+
+    it('should return array of possible words from a partial string', () => {
+      let completion = new CompleteMe();
+
+      completion.populate()
+
+      completion.select('piz', 'pizzeria');
+      completion.select('piz', 'pizzeria');
+      completion.select('piz', 'pizzeria');
+      completion.select('piz', 'pizzle');
+
+      expect(completion.suggest('piz')).to.deep.eq(["pizzeria", "pizzle", "pize", "pizza",  "pizzicato"])
+
+    })
+})

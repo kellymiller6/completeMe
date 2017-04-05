@@ -3,6 +3,7 @@ export default class Node {
     this.data = data;
     this.children = {}
     this.isWord = false;
-    this.address;
+    this.pref = 0;
+    // this.address;
   }
 }
